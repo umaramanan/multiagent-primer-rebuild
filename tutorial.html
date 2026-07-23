@@ -178,6 +178,7 @@
       <li><a href="#progress">Your progress so far</a></li>
       <li><a href="#concepts">Concepts, in plain English</a></li>
       <li><a href="#gitconcepts">Git terms explained</a></li>
+      <li><a href="#gitignore-framework">.gitignore: how to decide</a></li>
       <li><a href="#modules">The full course, module by module</a></li>
       <li><a href="#cheatsheet">Git cheat sheet</a></li>
       <li><a href="#glossary">Glossary</a></li>
@@ -262,6 +263,26 @@
       <dt>push</dt>
       <dd>Sends your saved snapshots from your computer up to GitHub, so the online copy catches up.</dd>
     </dl>
+  </section>
+
+  <section class="card" id="gitignore-framework">
+    <h2>🤔 .gitignore: how to decide (not a list to memorize)</h2>
+    <p>Don't memorize a list of filenames — ask three questions about <em>any</em> file, and the answer falls out on its own:</p>
+    <table>
+      <tr><th>Question</th><th>If "yes" →</th><th>Example</th></tr>
+      <tr><td><strong>1. Regenerable?</strong> If this vanished right now, would it come back automatically (a build/install command recreates it), or is real work gone forever?</td><td>Ignore it</td><td><code>node_modules/</code>, <code>dist/</code> — both rebuild from a source file you <em>do</em> track</td></tr>
+      <tr><td><strong>2. Secret?</strong> Does it contain a password, API key, or token?</td><td>Ignore it, no exceptions — even in a private repo, history is forever</td><td><code>.env</code></td></tr>
+      <tr><td><strong>3. Personal preference?</strong> Is this specific to your own machine/editor, not shared project work?</td><td>Ignore it</td><td><code>.vscode/</code>, <code>.DS_Store</code></td></tr>
+    </table>
+    <p>If the answer to all three is "no" — a human deliberately wrote it, it's not a secret, and it's not just your personal setup — <strong>track it</strong>. That's a real project file (e.g. <code>src/index.js</code>).</p>
+
+    <h3>The nuance: "but my team needs this config"</h3>
+    <p>Real-world wrinkle we worked through: a <code>.env</code> file often holds settings a whole team needs (like which database to connect to), not just secrets. The fix isn't to track the real file — it's to <strong>separate the shape from the value</strong>:</p>
+    <ul>
+      <li><code>.env</code> — the real file, real secret values (<code>DB_PASSWORD=actualSecret123</code>). Always ignored.</li>
+      <li><code>.env.example</code> — same variable names, fake/blank placeholder values (<code>DB_PASSWORD=your_password_here</code>). This one <strong>is</strong> tracked and committed, so teammates know what config exists without ever seeing a real secret.</li>
+    </ul>
+    <p><strong>Rule of thumb: share the structure, never the secret.</strong></p>
   </section>
 
   <section class="card" id="modules">
