@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi-Agent Systems — Tutorial</title>
+<style>
+  :root {
+    --bg: #faf9f6;
+    --panel: #ffffff;
+    --ink: #2b2620;
+    --ink-soft: #5a5347;
+    --accent: #a8532f;
+    --accent-soft: #f1e3d8;
+    --line: #e6ddd0;
+    --code-bg: #2b2620;
+    --code-ink: #f1e9dc;
+    --green: #4d7c4d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 40px 24px 100px;
+  }
+  header.hero {
+    padding: 36px 24px;
+    background: linear-gradient(135deg, var(--accent) 0%, #c97b4c 100%);
+    color: #fff;
+    border-radius: 14px;
+    margin-bottom: 28px;
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 1.7rem; }
+  header.hero p { margin: 0; opacity: 0.92; font-size: 0.98rem; }
+
+  nav.toc {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 28px;
+  }
+  nav.toc h2 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); margin: 0 0 10px; }
+  nav.toc ul { columns: 2; margin: 0; padding-left: 18px; font-size: 0.92rem; }
+  nav.toc li { margin-bottom: 6px; }
+  nav.toc a { color: var(--accent); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+
+  section.card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px 26px;
+    margin-bottom: 20px;
+  }
+  section.card h2 {
+    margin-top: 0;
+    font-size: 1.25rem;
+    border-bottom: 2px solid var(--accent-soft);
+    padding-bottom: 10px;
+  }
+  section.card h3 { font-size: 1rem; color: var(--accent); margin-bottom: 6px; }
+
+  .pill {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  code, pre {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.86rem;
+  }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    padding: 14px 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 10px 0;
+  }
+  p code, li code {
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  details.module {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin-bottom: 14px;
+    padding: 0;
+    overflow: hidden;
+  }
+  details.module summary {
+    cursor: pointer;
+    padding: 16px 22px;
+    font-weight: 600;
+    font-size: 1.02rem;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fbf6ef;
+  }
+  details.module summary::-webkit-details-marker { display: none; }
+  details.module summary:after {
+    content: "+";
+    font-size: 1.4rem;
+    color: var(--accent);
+    font-weight: 400;
+  }
+  details.module[open] summary:after { content: "–"; }
+  details.module .inner { padding: 6px 22px 20px; }
+  details.module .inner h4 { margin-bottom: 4px; color: var(--ink-soft); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  details.module .inner p, details.module .inner ul { margin-top: 4px; }
+
+  .checklist { list-style: none; padding: 0; margin: 0; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px dashed var(--line);
+    font-size: 0.95rem;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist .check {
+    width: 20px; height: 20px; border-radius: 50%;
+    flex-shrink: 0; margin-top: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; color: #fff;
+  }
+  .done { background: var(--green); }
+  .todo { background: #cbbfa9; }
+  .next-badge {
+    display: inline-block; margin-top: 10px; padding: 8px 14px;
+    background: var(--accent-soft); color: var(--accent);
+    border-radius: 8px; font-size: 0.88rem; font-weight: 600;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { color: var(--ink-soft); font-weight: 600; }
+
+  .glossary dt { font-weight: 700; color: var(--accent); margin-top: 12px; }
+  .glossary dd { margin-left: 0; color: var(--ink-soft); }
+
+  footer { text-align: center; color: var(--ink-soft); font-size: 0.85rem; margin-top: 40px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <h1>Multi-Agent Systems — Your Tutorial</h1>
+    <p>A page you can come back to anytime. Covers the concepts in plain English, your live progress so far, and the full build-it-yourself course. Open this file directly in any browser — no internet needed.</p>
+  </header>
+
+  <nav class="toc">
+    <h2>On this page</h2>
+    <ul>
+      <li><a href="#progress">Your progress so far</a></li>
+      <li><a href="#concepts">Concepts, in plain English</a></li>
+      <li><a href="#gitconcepts">Git terms explained</a></li>
+      <li><a href="#modules">The full course, module by module</a></li>
+      <li><a href="#cheatsheet">Git cheat sheet</a></li>
+      <li><a href="#glossary">Glossary</a></li>
+    </ul>
+  </nav>
+
+  <section class="card" id="progress">
+    <h2>📍 Your progress so far <span class="pill">Stage 0 — Setup</span></h2>
+    <p>This reflects exactly what you've done in the live session, in order.</p>
+    <ul class="checklist">
+      <li><span class="check done">✓</span> Created the local project folder (<code>multiagent-primer-rebuild</code>)</li>
+      <li><span class="check done">✓</span> Ran <code>git init</code> — turned on change-tracking for the folder</li>
+      <li><span class="check done">✓</span> Confirmed logged into GitHub via <code>gh auth status</code> (account: umaramanan)</li>
+      <li><span class="check done">✓</span> Created the GitHub repo with <code>gh repo create ... --remote=origin</code></li>
+      <li><span class="check done">✓</span> Renamed local branch <code>master → main</code> to match GitHub's default</li>
+      <li><span class="check done">✓</span> Created <code>README.md</code></li>
+      <li><span class="check done">✓</span> Staged it with <code>git add README.md</code></li>
+      <li><span class="check done">✓</span> Committed it with <code>git commit -m "docs: add README"</code></li>
+      <li><span class="check done">✓</span> Pushed it to GitHub with <code>git push -u origin main</code></li>
+      <li><span class="check todo">•</span> Verify the file shows up on github.com</li>
+      <li><span class="check todo">•</span> Add <code>PROJECT.md</code> and <code>.gitignore</code></li>
+      <li><span class="check todo">•</span> Turn on branch protection for <code>main</code> (require a PR before merging)</li>
+    </ul>
+    <div class="next-badge">Next up: confirm the GitHub push, then finish Stage 0 with branch protection.</div>
+  </section>
+
+  <section class="card" id="concepts">
+    <h2>🧠 Concepts, in plain English</h2>
+
+    <h3>What this whole project is about</h3>
+    <p>Using <em>one</em> AI assistant is simple. The moment you use <em>several</em> at once on the same job, three new problems show up that don't exist with just one: they can duplicate each other's work, they can step on each other's changes, and nobody automatically knows when a human needs to approve something risky before it happens. This course walks you through each problem on purpose, then teaches the standard fix.</p>
+
+    <h3>The journey, stage by stage</h3>
+    <table>
+      <tr><th>Stage</th><th>What happens</th><th>The "aha"</th></tr>
+      <tr><td>1 — Solo</td><td>One AI assistant does a real job cleanly</td><td>"One focused worker already works fine"</td></tr>
+      <tr><td>2 — Chaos</td><td>Three AI assistants, one shared notepad, zero rules</td><td>"Oh — THIS is why teams need structure"</td></tr>
+      <tr><td>3 — To-do list</td><td>Tasks get claimed once, assigned by who's suited</td><td>Fixes duplication and unfair grabbing</td></tr>
+      <tr><td>4 — Team shapes</td><td>Boss-and-workers vs. assembly-line vs. flat group</td><td>The shape you pick changes the outcome</td></tr>
+      <tr><td>5 — Human checkpoint</td><td>Risky actions need your OK first</td><td>Rubber-stamping is worse than no check at all</td></tr>
+      <tr><td>6 — Real test</td><td>Everything together, building something real</td><td>Graded on teamwork, not just output</td></tr>
+    </table>
+
+    <h3>The 16 Pillars — your reference checklist</h3>
+    <p>Every design decision in this course traces back to one of these. You don't need to memorize them — just be able to point at a system and say which ones it covers.</p>
+    <table>
+      <tr><th>#</th><th>Pillar</th><th>Plain-English meaning</th></tr>
+      <tr><td>1</td><td>Shared state</td><td>Everyone reads/writes the same notepad, so nobody works from a private, wrong picture.</td></tr>
+      <tr><td>2</td><td>Task allocation</td><td>Work goes to whoever's actually suited for it, not just whoever's fastest to grab it.</td></tr>
+      <tr><td>3</td><td>Team design</td><td>Boss-led, assembly-line, or flat group — the shape has to fit the job.</td></tr>
+      <tr><td>4</td><td>Result sharing</td><td>Finished work gets posted with "who made this," so it's not silently redone.</td></tr>
+      <tr><td>5</td><td>Communication</td><td>Messages say what to <em>do</em>, not just what happened.</td></tr>
+      <tr><td>6</td><td>Negotiation</td><td>Conflicts get resolved by a rule, not by both sides quietly doing their own thing.</td></tr>
+      <tr><td>7</td><td>Goal persistence</td><td>Stays on task instead of wandering off and "improving" everything it notices.</td></tr>
+      <tr><td>8</td><td>Memory</td><td>A lesson learned today isn't forgotten tomorrow.</td></tr>
+      <tr><td>9</td><td>Learning</td><td>A mistake happens once, not fifty times.</td></tr>
+      <tr><td>10</td><td>Human-in-the-loop</td><td>Graduated levels of "check with me first" — never a rubber stamp.</td></tr>
+      <tr><td>11</td><td>Embodied agents</td><td>Real-world physical limits the model can't reason around.</td></tr>
+      <tr><td>12</td><td>Trust</td><td>New team members earn trust over time; being new ≠ being unreliable, but it does mean closer watching at first.</td></tr>
+      <tr><td>13</td><td>Governance</td><td>Hard rules that can't be talked around, even by a clever request.</td></tr>
+      <tr><td>14</td><td>Simulation</td><td>Test the bigger, messier version before it happens for real.</td></tr>
+      <tr><td>15</td><td>Evaluation</td><td>Grade the teamwork, not just whether the output looks fine.</td></tr>
+      <tr><td>16</td><td>Frameworks</td><td>Know what a tool actually solves before reaching for it.</td></tr>
+    </table>
+  </section>
+
+  <section class="card" id="gitconcepts">
+    <h2>🔧 Git terms explained (the ones that tripped us up)</h2>
+    <dl class="glossary">
+      <dt>origin</dt>
+      <dd>A pointer to <em>where</em> your project lives online (GitHub). It's a location, not a version.</dd>
+      <dt>main (formerly "master")</dt>
+      <dd>The name of the primary <em>timeline</em> inside your repo. A branch, not a location. One <code>origin</code> can hold many branches.</dd>
+      <dt>create (in <code>gh repo create</code>)</dt>
+      <dd>The action word — "make a new one." Whatever comes right after it is just the name you're assigning, not a second instruction.</dd>
+      <dt>local vs. online copy</dt>
+      <dd>Your local folder and the GitHub repo are two separate copies that you deliberately keep in sync with <code>push</code> (local → GitHub) and <code>pull</code> (GitHub → local). Naming them the same thing is a convenience, not a requirement.</dd>
+      <dt>add (staging)</dt>
+      <dd>Marking a changed file as "include this in my next save point." Like putting an item in a cart before checkout. Produces no output when it works.</dd>
+      <dt>commit</dt>
+      <dd>The actual save point — a permanent snapshot with a note attached, saved to your local history.</dd>
+      <dt>push</dt>
+      <dd>Sends your saved snapshots from your computer up to GitHub, so the online copy catches up.</dd>
+    </dl>
+  </section>
+
+  <section class="card" id="modules">
+    <h2>📚 The full course, module by module</h2>
+    <p>Click any module to expand it. Each one follows the same shape: Concept → Requirement → Design → Build Steps → Git Workflow → Checkpoint.</p>
+
+    <details class="module" open>
+      <summary>Stage 0 — Environment & GitHub Setup <span class="pill">in progress</span></summary>
+      <div class="inner">
+        <h4>Concept</h4>
+        <p>Every module lives on its own branch and lands on <code>main</code> via a pull request — practicing the "check before it counts" habit you'll later build into the AI agents themselves.</p>
+        <h4>Build steps</h4>
+        <ul>
+          <li>Create local folder, <code>git init</code></li>
+          <li>Create GitHub repo, link as <code>origin</code></li>
+          <li>Rename branch to <code>main</code></li>
+          <li>Add README + PROJECT.md, commit, push</li>
+          <li>Turn on branch protection requiring a PR before merge</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="module">
+      <summary>Module 1 — Single-Agent Baseline</summary>
+      <div class="inner">
+        <h4>Concept</h4>
+        <p>Before feeling the multi-agent crisis, prove that one well-prompted AI assistant, with a clear role, already ships clean work on a small real codebase.</p>
+        <h4>Requirement</h4>
+        <p>Pick a small imperfect codebase. Write a role prompt (<code>ROLE.md</code>) and 2–3 scoped tickets. Run one Claude Code session through them end to end.</p>
+        <h4>Checkpoint</h4>
+        <p>Did it stay in scope? Is the role prompt specific enough that a different agent reading it would behave the same way?</p>
+      </div>
+    </details>
+
+    <details class="module">
+      <summary>Module 2 — Shared State / The Blackboard</summary>
+      <div class="inner">
+        <h4>Concept — Pillars 1 &amp; 4</h4>
+        <p>Three identical agents, one shared markdown file, no coordinator. Watch duplication, races, and a synthesis bottleneck appear.</p>
+        <h4>Requirement</h4>
+        <p>A shared brief (<code>task.md</code>), an empty <code>blackboard.md</code>, and a <code>CLAUDE.md</code> protocol: append-only writes, read-before-you-research, one agent writes the final synthesis.</p>
+        <h4>Checkpoint</h4>
+        <p>Write a <code>POSTMORTEM.md</code> diagnosing exactly where duplication and idle time happened, and which pillar was missing.</p>
+      </div>
+    </details>
+
+    <details class="module">
+      <summary>Module 3 — Task Allocation</summary>
+      <div class="inner">
+        <h4>Concept — Pillar 2</h4>
+        <p>Fix "first agent to notice grabs it" with atomic, capability-based task claiming — a tiny CLI with a real file lock.</p>
+        <h4>Requirement</h4>
+        <p>Build <code>task-cli</code> backed by <code>tasks.json</code>, with an exclusive-lock file so two agents can never both claim the same task. Round 1: first-claim. Round 2: capability-gated.</p>
+        <h4>Checkpoint</h4>
+        <p>Show the lock code and a test proving two simultaneous claims never both succeed.</p>
+      </div>
+    </details>
+
+    <details class="module">
+      <summary>Module 4 — Team Design (Topology)</summary>
+      <div class="inner">
+        <h4>Concept — Pillar 3</h4>
+        <p>Same brief, three team shapes: supervisor (one delegates + integrates), pipeline (strict sequential handoff), swarm (capability-aware peers).</p>
+        <h4>Checkpoint</h4>
+        <p>A comparison table (time, quality, single-point-of-failure risk) and a justified pick for which topology you'd actually use in production.</p>
+      </div>
+    </details>
+
+    <details class="module">
+      <summary>Module 5 — Human-in-the-Loop &amp; Governance</summary>
+      <div class="inner">
+        <h4>Concept — Pillars 10 &amp; 13</h4>
+        <p>HITL (every step) / HOTL (exceptions only) / HOOTL (outcomes only). A gate agent routes proposals by risk; a governance floor blocks some actions no matter what the AI argues.</p>
+        <h4>Requirement</h4>
+        <p>Build <code>hitl-cli</code> + <code>gate-policy.md</code>. Run normal scenarios, then adversarial ones (prompt injection, high-stakes requests) and see what gets through.</p>
+        <h4>Checkpoint</h4>
+        <p>Find one adversarial proposal that got through when it shouldn't have — if none did on the first try, the test wasn't adversarial enough.</p>
+      </div>
+    </details>
+
+    <details class="module">
+      <summary>Module 6 — Capstone Build Sprint</summary>
+      <div class="inner">
+        <h4>Concept — Pillars 1, 2, 3, 4, 5, 9, 15</h4>
+        <p>Three role-specialized agents ship real code using typed messages (<code>[REQUEST]</code> <code>[INFORM]</code> <code>[COMMIT]</code> <code>[BLOCK]</code> <code>[ESCALATE]</code> <code>[LESSON]</code>), atomic task claims, and stigmergic learning.</p>
+        <h4>Git angle</h4>
+        <p>Add a GitHub Actions workflow that runs your <code>eval-self.sh</code> on every PR — GitHub becomes the automated evaluator, not just a commit log.</p>
+        <h4>Checkpoint</h4>
+        <p>L1/L2/L3 eval output, one <code>[LESSON]</code> that changed downstream behavior, and a green CI check.</p>
+      </div>
+    </details>
+
+    <details class="module">
+      <summary>Bonus — Dynamic Agent Registry</summary>
+      <div class="inner">
+        <h4>Concept — Pillars 2 &amp; 3, abstracted</h4>
+        <p>A registry of agent <em>types</em> (not fixed instances), each with capabilities and a spawn/reap rule, matched against a backlog by an orchestrator loop: SCAN → MATCH → SPAWN → CLAIM → PUBLISH → REAP → REPEAT.</p>
+        <h4>Checkpoint</h4>
+        <p>A hand-traced timeline for a toy backlog, including one capability collision worked through.</p>
+      </div>
+    </details>
+
+    <details class="module">
+      <summary>Final — Polish &amp; Publish</summary>
+      <div class="inner">
+        <p>Write the real README, update PROJECT.md with your own "what NOT to do" notes, tag a release (<code>v1.0</code>), and consider going public once you're happy with it.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="card" id="cheatsheet">
+    <h2>⌨️ Git cheat sheet</h2>
+    <pre>git checkout main && git pull
+git checkout -b moduleN/short-name
+
+git add -A
+git commit -m "type: what changed"     # feat / fix / docs / test
+
+git push -u origin moduleN/short-name
+gh pr create --fill
+gh pr view --web
+gh pr merge --squash</pre>
+  </section>
+
+  <section class="card" id="glossary">
+    <h2>📖 Glossary</h2>
+    <dl class="glossary">
+      <dt>Blackboard</dt>
+      <dd>Shared file/store every agent reads and writes — the simplest form of shared state.</dd>
+      <dt>Contract net</dt>
+      <dd>Task-allocation protocol: tasks announced, capable agents matched — not first-come.</dd>
+      <dt>Performative</dt>
+      <dd>A typed message tag (REQUEST, INFORM, COMMIT...) that encodes intent, not just text.</dd>
+      <dt>Stigmergic learning</dt>
+      <dd>Agents coordinate indirectly by leaving traces in the environment (a "lesson" note) rather than talking directly.</dd>
+      <dt>HITL / HOTL / HOOTL</dt>
+      <dd>Human-in / on / out-of-the-loop: approve every step / approve exceptions only / review outcomes only.</dd>
+      <dt>Provenance</dt>
+      <dd>A result tagged with who produced it and from what inputs, so it can be trusted or challenged.</dd>
+      <dt>Topology</dt>
+      <dd>The shape of who talks to whom: supervisor (hub), pipeline (chain), swarm (mesh).</dd>
+    </dl>
+  </section>
+
+  <footer>Your personal reference — safe to keep open in a tab while you work through each stage.</footer>
+</div>
+</body>
+</html>
