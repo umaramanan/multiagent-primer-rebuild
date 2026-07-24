@@ -204,7 +204,7 @@
       <li><span class="check done">✓</span> Proved it works: a direct push to <code>main</code> was genuinely rejected (<code>protected branch hook declined</code>)</li>
       <li><span class="check done">✓</span> Practiced the real recovery workflow: moved the stuck commit onto <code>test/branch-protection</code>, reset <code>main</code> to match GitHub, opened a PR, reviewed it, merged with <code>--squash</code>, pulled the result</li>
     </ul>
-    <div class="next-badge">Stage 0 fully complete ✓ — Module 1 starts next.</div>
+    <div class="next-badge">Stage 0 ✓ and Module 1 ✓ both complete — Module 2 (the blackboard chaos) starts next.</div>
   </section>
 
   <section class="card" id="mission">
@@ -313,15 +313,39 @@
       </div>
     </details>
 
-    <details class="module">
-      <summary>Module 1 — Single-Agent Baseline</summary>
+    <details class="module" open>
+      <summary>Module 1 — Single-Agent Baseline <span class="pill">complete ✓</span></summary>
       <div class="inner">
         <h4>Concept</h4>
-        <p>Before feeling the multi-agent crisis, prove that one well-prompted AI assistant, with a clear role, already ships clean work on a small real codebase.</p>
-        <h4>Requirement</h4>
-        <p>Pick a small imperfect codebase. Write a role prompt (<code>ROLE.md</code>) and 2–3 scoped tickets. Run one Claude Code session through them end to end.</p>
-        <h4>Checkpoint</h4>
-        <p>Did it stay in scope? Is the role prompt specific enough that a different agent reading it would behave the same way?</p>
+        <p>Before feeling the multi-agent crisis, prove that one well-prompted AI assistant, with a clear role, already ships clean work on a small real (brownfield) codebase.</p>
+
+        <h4>What we actually did</h4>
+        <p>Sandbox: <code>docvault-legacy</code> (Java/Spring Boot e-commerce API), copied from the reference project into <code>module1-workflow/sandbox-app</code>. Wrote <code>ROLE.md</code> scoping the agent to one ticket. Ticket: remove a duplicate Spanish-language <code>"nombre"</code> sort option in <code>SearchUtil.java</code> (kept only <code>"name"</code>). Ran a fresh Claude Code session pointed at the brief, then independently verified its work before trusting it.</p>
+
+        <h4>Theory — layered architecture (mapped to .NET)</h4>
+        <table>
+          <tr><th>Java layer</th><th>Job</th><th>.NET equivalent</th></tr>
+          <tr><td>Controller</td><td>receives the web request</td><td>Controller class</td></tr>
+          <tr><td>Service</td><td>decides what should happen</td><td>Service class</td></tr>
+          <tr><td>Repository</td><td>talks to the database</td><td>Repository / DbContext</td></tr>
+          <tr><td>Model</td><td>shape of the data</td><td>Model / entity class</td></tr>
+        </table>
+        <p><code>pom.xml</code> ≈ <code>.csproj</code>. <code>application.properties</code> ≈ <code>appsettings.json</code>. <code>mvn</code> ≈ <code>dotnet</code> CLI. <code>target/</code> (build output) ≈ <code>bin/</code>/<code>obj/</code> — auto-generated, always <code>.gitignore</code>'d.</p>
+
+        <h4>Theory — why this discipline matters most on brownfield</h4>
+        <p>Greenfield code has nothing to accidentally break. Brownfield code has hidden landmines (e.g. a "DO NOT REMOVE — load-bearing" comment) — a tight role prompt and small scoped tickets are what stop an agent from wandering into one. Most real engineering work is brownfield, which is why this discipline is the valuable skill, not the Java itself.</p>
+
+        <h4>Issues we actually hit (and the fix for each)</h4>
+        <ul>
+          <li><strong>First ticket idea didn't match reality.</strong> <code>REVIEW.yaml</code> claimed hardcoded secrets in <code>application.properties</code> — but the real file already used <code>${VAR:default}</code> env-var syntax. Lesson: always verify a ticket against the current file before trusting a written audit/bug report.</li>
+          <li><strong><code>git diff</code> showed nothing after the agent's fix.</strong> We never committed the sandbox app's original state before letting the agent edit it, so Git had nothing tracked to compare against. Lesson: commit the "before" state first, always, so agent diffs are reviewable.</li>
+          <li><strong>Verified the agent's "9 unrelated failures" claim independently</strong> by running the full test suite against a completely untouched copy of the app — same 9 failures appeared with zero changes of ours, proving the agent was accurate rather than just trusting its summary.</li>
+          <li><strong>Maven's build output (<code>target/</code>) got committed by accident.</strong> Fixed by adding <code>target/</code> to <code>.gitignore</code> (stops future tracking) plus <code>git rm -r --cached</code> (untracks what was already committed, without deleting the real files).</li>
+          <li><strong>Committed directly to <code>main</code> by accident, twice.</strong> Recovered both times with the same pattern from Stage 0: branch off where you are, reset <code>main</code> back to <code>origin/main</code>, push the branch, open a PR properly.</li>
+        </ul>
+
+        <h4>Checkpoint — passed</h4>
+        <p>One agent, one scoped ticket, independently verified (not just trusted), shipped through a proper branch → PR → merge flow.</p>
       </div>
     </details>
 
